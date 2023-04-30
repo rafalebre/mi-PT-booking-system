@@ -57,6 +57,19 @@ const TraineePage = () => {
     setSelectedCity('');
   };
 
+  const handleApply = async (eventId) => {
+    // Replace with the trainee's actual ID or details
+    const traineeId = 'trainee1';
+
+    await db.collection('applications').add({
+      eventId,
+      traineeId,
+      status: 'pending',
+    });
+
+    alert('Applied for the event successfully');
+  };
+
   return (
     <div>
       <h1>Trainee Page</h1>
@@ -96,6 +109,7 @@ const TraineePage = () => {
         {filteredEvents.map((event) => (
           <li key={event.id}>
             {event.activity} - {event.city} - {event.date} - {event.time}
+            <button onClick={() => handleApply(event.id)}>Apply</button>
           </li>
         ))}
       </ul>
