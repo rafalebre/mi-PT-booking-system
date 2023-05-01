@@ -11,6 +11,7 @@ const CoachPage = () => {
     hour: '',
     minutes: '',
     city: '',
+    time: '',
   });
 
   const activities = [
@@ -120,8 +121,25 @@ const CoachPage = () => {
             <label htmlFor="date">Date:</label>
             <input type="date" name="date" value={eventData.date} onChange={handleChange} required />
 
-            <label htmlFor="time">Time:</label>
-            <input type="time" name="time" step="1800" value={eventData.time} onChange={handleChange} required />
+            <label htmlFor="hour">Hour:</label>
+            <select name="hour" value={eventData.hour} onChange={handleChange} required>
+              <option value="">Select an hour</option>
+              {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                <option key={hour} value={hour}>
+                  {hour.toString().padStart(2, '0')}
+                </option>
+              ))}
+            </select>
+
+            <label htmlFor="minutes">Minutes:</label>
+            <select name="minutes" value={eventData.minutes} onChange={handleChange} required>
+              <option value="">Select minutes</option>
+              {['00', '15', '30', '45'].map((minutes) => (
+                <option key={minutes} value={minutes}>
+                  {minutes}
+                </option>
+              ))}
+            </select>
 
             <label htmlFor="city">City:</label>
             <select name="city" value={eventData.city} onChange={handleChange} required>
