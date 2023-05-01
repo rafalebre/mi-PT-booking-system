@@ -107,7 +107,36 @@ const CoachPage = () => {
       {showModal && (
         <div className="modal">
           <form onSubmit={handleSubmit}>
-            {/* ... (form contents) ... */}
+            <label htmlFor="activity">Activity:</label>
+            <select name="activity" value={eventData.activity} onChange={handleChange} required>
+              <option value="">Select an activity</option>
+              {activities.map((activity) => (
+                <option key={activity} value={activity}>
+                  {activity}
+                </option>
+              ))}
+            </select>
+
+            <label htmlFor="date">Date:</label>
+            <input type="date" name="date" value={eventData.date} onChange={handleChange} required />
+
+            <label htmlFor="time">Time:</label>
+            <input type="time" name="time" step="1800" value={eventData.time} onChange={handleChange} required />
+
+            <label htmlFor="city">City:</label>
+            <select name="city" value={eventData.city} onChange={handleChange} required>
+              <option value="">Select a city</option>
+              {cities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+
+            <button type="submit">Submit</button>
+            <button type="button" onClick={() => setShowModal(false)}>
+              Cancel
+            </button>
           </form>
         </div>
       )}
