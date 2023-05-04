@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import db from '../firebase';
+import axios from 'axios';
 
 const CoachPage = () => {
   const [events, setEvents] = useState([]);
@@ -45,59 +45,66 @@ const CoachPage = () => {
     setEventData({ ...eventData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const eventWithTime = {
       ...eventData,
       time: `${eventData.hour}:${eventData.minutes}`,
     };
 
-    db.collection('events')
-      .add(eventWithTime)
-      .then((docRef) => {
-        console.log('Event saved with ID:', docRef.id);
-        setEvents([...events, { ...eventWithTime, id: docRef.id }]);
-        setShowModal(false);
-      })
-      .catch((error) => {
-        console.error('Error adding event:', error);
-      });
+    try {
+      const response = await axios.post('/api/events', eventWithTime);
+      console.log('Event saved with ID:', response.data.id);
+      setEvents([...events, { ...eventWithTime, id: response.data.id }]);
+      setShowModal(false);
+    } catch (error) {
+      console.error('Error adding event:', error);
+    }
   };
 
   useEffect(() => {
-    const unsubscribe = db
-      .collection("events")
-      .onSnapshot((snapshot) => {
-        const fetchedEvents = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setEvents(fetchedEvents);
-      });
-
-    return () => {
-      unsubscribe();
+    const fetchEvents = async () => {
+      try {
+        const response = await axios.get('/api/events');
+        setEvents(response.data);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
     };
+
+    fetchEvents();
   }, []);
 
   useEffect(() => {
-    const unsubscribe = db
-      .collection("applications")
-      .onSnapshot((snapshot) => {
-        const fetchedApplications = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setApplications(fetchedApplications);
-      });
-
-    return () => {
-      unsubscribe();
+    const fetchApplications = async () => {
+      try {
+        const response = await axios.get('/api/applications');
+        setApplications(response.data);
+      } catch (error) {
+        console.error('Error fetching applications:', error);
+      }
     };
+
+    fetchApplications();
   }, []);
 
   const updateApplicationStatus = async (applicationId, status) => {
-    await db.collection('applications').doc(applicationId).update({ status });
+    try {
+      await axios.patch(`/api/applications/${applicationId}`, { status });
+    } catch (error) {
+      console.error('Error updating application status:', error);
+    }
+  };
+
+  const deleteEvent = async (eventId) => {
+    try {
+      await axios.delete(`/api/events/${eventId}`);
+      console.log('Event successfully deleted!');
+      const updatedEvents = events.filter((e) => e.id !== eventId);
+      setEvents(updatedEvents);
+    } catch (error) {
+      console.error('Error removing event:', error);
+    }
   };
 
   return (
@@ -158,25 +165,13 @@ const CoachPage = () => {
           </form>
         </div>
       )}
-       <ul>
+      <ul>
         {events.map((event) => (
           <li key={event.id}>
             {event.activity} - {event.date} - {event.time} - {event.city}{' '}
             <button
               onClick={() => {
-                // Remove the event from the Firestore database
-                db.collection('events')
-                  .doc(event.id)
-                  .delete()
-                  .then(() => {
-                    console.log('Event successfully deleted!');
-                    // Remove the event from the events array
-                    const updatedEvents = events.filter((e) => e.id !== event.id);
-                    setEvents(updatedEvents);
-                  })
-                  .catch((error) => {
-                    console.error('Error removing event:', error);
-                  });
+                deleteEvent(event.id);
               }}
             >
               Cancel

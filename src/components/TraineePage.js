@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import db from '../firebase';
+import axios from 'axios';
 
 const TraineePage = () => {
   const [events, setEvents] = useState([]);
@@ -36,9 +36,12 @@ const TraineePage = () => {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      const snapshot = await db.collection('events').get();
-      const fetchedEvents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setEvents(fetchedEvents);
+      try {
+        const response = await axios.get('/api/events');
+        setEvents(response.data);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
     };
 
     fetchEvents();
@@ -61,13 +64,17 @@ const TraineePage = () => {
     // Replace with the trainee's actual ID or details
     const traineeId = 'trainee1';
 
-    await db.collection('applications').add({
-      eventId,
-      traineeId,
-      status: 'pending',
-    });
+    try {
+      await axios.post('/api/applications', {
+        eventId,
+        traineeId,
+        status: 'pending',
+      });
 
-    alert('Applied for the event successfully');
+      alert('Applied for the event successfully');
+    } catch (error) {
+      console.error('Error applying for the event:', error);
+    }
   };
 
   return (
